@@ -29,12 +29,13 @@ if (-not (Test-Path $keystore)) {
 }
 
 if (-not (Test-Path $keyProps)) {
-    @"
+    $content = @"
 storePassword=nurtura2026
 keyPassword=nurtura2026
 keyAlias=nurtura
 storeFile=nurtura-release.jks
-"@ | Set-Content -Path $keyProps -Encoding UTF8
+"@
+    [System.IO.File]::WriteAllText($keyProps, $content)
     Write-Host "Created android/key.properties" -ForegroundColor Green
 }
 
@@ -53,6 +54,7 @@ try {
         flutter build apk --release --dart-define=API_BASE_URL=$ApiBaseUrl
         $out = "build\app\outputs\flutter-apk\app-release.apk"
     }
+    if ($LASTEXITCODE -ne 0) { throw "Flutter build failed with exit code $LASTEXITCODE" }
 } finally {
     Pop-Location
 }

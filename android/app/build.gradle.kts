@@ -1,6 +1,5 @@
 plugins {
     id("com.android.application")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
 
@@ -22,27 +21,11 @@ android {
         versionName = flutter.versionName
     }
 
-    signingConfigs {
-        create("release") {
-            val keyPropertiesFile = rootProject.file("key.properties")
-            if (keyPropertiesFile.exists()) {
-                val keyProperties = java.util.Properties()
-                keyProperties.load(keyPropertiesFile.inputStream())
-                keyPassword = keyProperties["keyPassword"] as String
-                storeFile = file(keyProperties["storeFile"] as String)
-                storePassword = keyProperties["storePassword"] as String
-                keyAlias = keyProperties["keyAlias"] as String
-            }
-        }
-    }
-
     buildTypes {
         release {
-            signingConfig = if (rootProject.file("key.properties").exists()) {
-                signingConfigs.getByName("release")
-            } else {
-                signingConfigs.getByName("debug")
-            }
+            // Debug signing for sideload/testing. For Play Store, add key.properties
+            // (see deploy-mobile.ps1) and wire a release signingConfig.
+            signingConfig = signingConfigs.getByName("debug")
         }
     }
 }
