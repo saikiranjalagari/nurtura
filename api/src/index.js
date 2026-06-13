@@ -39,7 +39,18 @@ async function ensureDatabase() {
       console.warn('RAG sync warning:', err.message);
     }
     return;
-  } catch {
+  } catch (err) {
+    const cloudMode =
+      process.env.DISABLE_EMBEDDED_PG === 'true' ||
+      process.env.DATABASE_URL ||
+      process.env.NODE_ENV === 'production';
+
+    if (cloudMode) {
+      throw new Error(
+        `PostgreSQL not reachable (${err.message}). Set DATABASE_URL or DB_* env vars.`
+      );
+    }
+
     console.log('PostgreSQL not reachable, starting embedded instance...');
   }
 
