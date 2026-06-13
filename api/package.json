@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "node --watch src/index.js",
-    "db:setup": "node src/setup-db.js"
+    "db:setup": "node src/setup-db.js",
+    "embed:knowledge": "node src/embed-knowledge.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

@@ -95,5 +95,19 @@ CREATE TABLE IF NOT EXISTS water_logs (
   UNIQUE (user_id, log_date)
 );
 
+CREATE TABLE IF NOT EXISTS knowledge_chunks (
+  id SERIAL PRIMARY KEY,
+  source_type VARCHAR(40) NOT NULL,
+  source_id VARCHAR(80) NOT NULL,
+  title VARCHAR(200) NOT NULL,
+  content TEXT NOT NULL,
+  content_hash VARCHAR(64) NOT NULL UNIQUE,
+  embedding JSONB,
+  metadata JSONB DEFAULT '{}'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_appointments_user ON appointments(user_id);
 CREATE INDEX IF NOT EXISTS idx_chat_user ON chat_messages(user_id);
+CREATE INDEX IF NOT EXISTS idx_knowledge_source ON knowledge_chunks(source_type);

@@ -1,5 +1,6 @@
 const OpenAI = require('openai');
 const { query } = require('./db');
+const { retrieveContext } = require('./rag');
 
 let client = null;
 
@@ -55,8 +56,14 @@ async function buildMessages(userId, threadId) {
     getUserContext(userId),
     getRecentMessages(userId, threadId),
   ]);
+  const userMessage = getLastUserMessage(history);
+  const ragContext = await retrieveContext(userMessage, userId);
+
+  const systemParts = [SYSTEM_PROMPT, userContext];
+  if (ragContext) systemParts.push(ragContext);
+
   return [
-    { role: 'system', content: `${SYSTEM_PROMPT}\n\n${userContext}` },
+    { role: 'system', content: systemParts.join('\n\n') },
     ...history,
   ];
 }

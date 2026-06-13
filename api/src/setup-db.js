@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const { Client } = require('pg');
 const { runSchema, runMigrations, seed } = require('./seed');
+const { syncKnowledgeBase } = require('./rag');
 require('dotenv').config();
 
 async function tryConnect(config) {
@@ -76,6 +77,7 @@ async function main() {
   await runSchema();
   await runMigrations();
   await seed();
+  await syncKnowledgeBase();
   await pool.end();
 
   if (embedded) {

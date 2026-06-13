@@ -7,6 +7,7 @@ require('dotenv').config();
 
 const { pool } = require('./db');
 const { runSchema, runMigrations, seed } = require('./seed');
+const { syncKnowledgeBase } = require('./rag');
 
 const usersRouter = require('./routes/users');
 const homeRouter = require('./routes/home');
@@ -32,6 +33,11 @@ async function ensureDatabase() {
     await runSchema();
     await runMigrations();
     await seed();
+    try {
+      await syncKnowledgeBase();
+    } catch (err) {
+      console.warn('RAG sync warning:', err.message);
+    }
     return;
   } catch {
     console.log('PostgreSQL not reachable, starting embedded instance...');
@@ -72,6 +78,11 @@ async function ensureDatabase() {
   await runSchema();
   await runMigrations();
   await seed();
+  try {
+    await syncKnowledgeBase();
+  } catch (err) {
+    console.warn('RAG sync warning:', err.message);
+  }
   console.log('Embedded PostgreSQL ready.');
 }
 
@@ -82,7 +93,16 @@ app.use(express.json());
 app.get('/api/health', async (_req, res) => {
   try {
     await pool.query('SELECT 1');
-    res.json({ status: 'ok', database: 'connected' });
+    const rag = await pool.query(
+      `SELECT COUNT(*)::int AS chunks,
+              COUNT(embedding)::int AS embedded
+       FROM knowledge_chunks`
+    );
+    res.json({
+      status: 'ok',
+      database: 'connected',
+      rag: rag.rows[0],
+    });
   } catch (err) {
     res.status(503).json({ status: 'error', message: err.message });
   }
